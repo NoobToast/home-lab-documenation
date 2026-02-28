@@ -11,6 +11,9 @@ This repository contains step-by-step guides for implementing network segmentati
 ### Network Design & Architecture
 - **[Designing Your Network](designing-your-network.md)** - Comprehensive guide to planning and implementing a layered security home network with VLANs, pfSense, and monitoring tools
 
+### Firewall Setup
+- **[Setting Up a pfSense Firewall](setting-up-your-firewall.md)** - A guide from creating a bootable USB drive with pfSense to setting up the firewall basics.
+
 ### Network Configuration
 - **[VLAN Setup in pfSense](vlan-setup-guide.md)** - Step-by-step guide to configuring network segmentation using VLANs in pfSense 2.8
 
