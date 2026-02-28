@@ -9,21 +9,21 @@ This repository contains step-by-step guides for implementing network segmentati
 ## Guides
 
 ### Network Design & Architecture
-- **[Designing Your Network](designing-your-network.md)** - Comprehensive guide to planning and implementing a layered security home network with VLANs, pfSense, and monitoring tools
+- **[Designing Your Network](0.designing-your-network.md)** - Comprehensive guide to planning and implementing a layered security home network with VLANs, pfSense, and monitoring tools
 
 ### Firewall Setup
-- **[Setting Up a pfSense Firewall](setting-up-your-firewall.md)** - A guide from creating a bootable USB drive with pfSense to setting up the firewall basics.
+- **[Setting Up a pfSense Firewall](1.setting-up-your-firewall.md)** - A guide from creating a bootable USB drive with pfSense to setting up the firewall basics.
 
 ### Network Configuration
-- **[VLAN Setup in pfSense](vlan-setup-guide.md)** - Step-by-step guide to configuring network segmentation using VLANs in pfSense 2.8
+- **[VLAN Setup in pfSense](2.vlan-setup-guide.md)** - Step-by-step guide to configuring network segmentation using VLANs in pfSense 2.8
 
 ### Security & Filtering
-- **[pfBlockerNG Configuration](pfBlocker-setup.md)** - Setting up IP blocking and DNS-based filtering for ads, trackers, and malicious domains
+- **[pfBlockerNG Configuration](3.pfBlocker-setup.md)** - Setting up IP blocking and DNS-based filtering for ads, trackers, and malicious domains
 
-- **[Suricata Configuration](suricata-setup.md)** - Setting up Suricata in pfSense. 
+- **[Suricata Configuration](5.suricata-setup.md)** - Setting up Suricata in pfSense. 
 
 ### System Administration
-- **[Samba File Share Setup](samba-file-share.md)** - Configuring SMB file sharing on Ubuntu Server for local network access
+- **[Samba File Share Setup](5.samba-file-share.md)** - Configuring SMB file sharing on Ubuntu Server for local network access
 
 ## Lab Environment
 
