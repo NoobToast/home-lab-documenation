@@ -4,6 +4,13 @@
 
 A guide to setting up pfBlockerNG for IP blocking and DNS filtering on pfSense. This guide assumes you have already completed the [pfSense installation](installing-pfsense.md) and [VLAN setup](vlan-setup-pfsense.md) guides.
 
+At the time of updating:
+Live for:
+<img width="410" height="44" alt="Screenshot from 2026-02-28 15-58-30" src="https://github.com/user-attachments/assets/e4a593fb-7505-46d8-8135-6d6151c6c8a5" />
+
+pfBlockerNG Activity:
+<img width="550" height="309" alt="Screenshot from 2026-02-28 15-59-33" src="https://github.com/user-attachments/assets/07b5a8f1-bef3-4e25-abc7-5b42b098bde1" />
+
 ---
 
 ## What is pfBlockerNG?
