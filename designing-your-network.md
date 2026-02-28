@@ -46,7 +46,7 @@ Here's a quick breakdown of my own setup:
 - 🔀 **Switch:** TP-Link SG108E ($20) – Managed gigabit switch with VLAN and QoS support
 - 📶 **Wireless Access Point:** TP-Link Omada AC-1350 ($50) – Dual-band, VLAN-capable access point for Home / Guest / IoT networks
 - 🖥️ **Network Utility Server:** HP EliteDesk 800 G3 Mini ($75) – Ubuntu Desktop running: Wazuh (SIEM), Shuffle (SOAR), ClamAV (Antivirus), Netdata (Monitoring)
-- 💾 **File Server:** Dell Wyse 5070 ($50) – Ubuntu Server hosting Apache2, Samba, MariaDB, and Nextcloud
+- 💾 **File Server:** HP EliteDesk 800 G3 ($50) – Ubuntu Server hosting Apache2, Samba, MariaDB
 
 Because software like Suricata inspects every packet, CPU power matters. Both of my EliteDesks use i5-6500 CPUs — plenty for this workload.
 
@@ -66,6 +66,16 @@ pfBlockerNG enhances pfSense by combining IP reputation blocking and DNS-based f
 
 Suricata is an open-source IDS/IPS that monitors network traffic in real time to detect and block malicious activity. Using deep packet inspection and rule sets like Emerging Threats, it identifies exploits, scans, and malware before they reach your devices. In IDS mode, it alerts you to suspicious traffic; in IPS mode, it actively blocks it. Suricata integrates with Wazuh and Elastic Stack for log analysis and visualization, providing a powerful, automated layer of defense.
 
+### Network Antivirus – ClamAV
+
+ClamAV is an open-source antivirus engine that scans files, emails, and network traffic for malware using frequently updated signature databases. It integrates with mail servers and tools like Wazuh or pfSense to provide an extra layer of protection, catching threats that slip past perimeter defenses.
+
+## Eventual Additions
+
+### Network Monitoring – Netdata
+
+Netdata is a lightweight, real-time monitoring tool that visualizes system and network performance through an interactive dashboard. It tracks CPU, memory, disk, and network usage with second-by-second updates, integrates with Wazuh or Prometheus, and helps identify bottlenecks or anomalies instantly.
+
 ### SIEM – Wazuh
 
 Wazuh is an open-source SIEM platform that centralizes security monitoring across endpoints, servers, and network devices. It detects intrusions, malware, and policy violations in real time, alerting administrators through a unified dashboard. Integrated with Elastic Stack and OSSEC, Wazuh provides scalable, automated threat detection and compliance visibility for both home and enterprise setups.
@@ -74,13 +84,6 @@ Wazuh is an open-source SIEM platform that centralizes security monitoring acros
 
 Shuffle is an open-source SOAR tool that automates and links security workflows between platforms like Wazuh, pfSense, and email scanners. With its drag-and-drop interface, you can create workflows that trigger automatic responses — such as alerting, IP blocking, or ticket creation — reducing manual work and speeding up incident response.
 
-### Network Antivirus – ClamAV
-
-ClamAV is an open-source antivirus engine that scans files, emails, and network traffic for malware using frequently updated signature databases. It integrates with mail servers and tools like Wazuh or pfSense to provide an extra layer of protection, catching threats that slip past perimeter defenses.
-
-### Network Monitoring – Netdata
-
-Netdata is a lightweight, real-time monitoring tool that visualizes system and network performance through an interactive dashboard. It tracks CPU, memory, disk, and network usage with second-by-second updates, integrates with Wazuh or Prometheus, and helps identify bottlenecks or anomalies instantly.
 
 ### How It All Fits Together
 
