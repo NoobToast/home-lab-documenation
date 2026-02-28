@@ -51,9 +51,7 @@ We'll use Rufus to flash the pfSense ISO onto the USB drive.
 
 <img width="512" height="636" alt="image" src="https://github.com/user-attachments/assets/52a5650b-907e-412f-a195-696d19de9d74" />
 
-
-
-That USB drive is reusable — you can use it to install pfSense on as many machines as you want.
+The USB drive is reusable — you can use it to install pfSense on as many machines as you want.
 
 ---
 
@@ -148,6 +146,11 @@ The first two are typically configured automatically by the Setup Wizard. Verify
 |------|---------|
 | Anti-lockout rule | Keeps you from losing GUI access (default, don't remove it) |
 | Allow LAN → Any | Permits all outbound traffic from LAN |
+
+<img width="1005" height="108" alt="image" src="https://github.com/user-attachments/assets/37ddca4c-fef5-424a-af1c-76affc362114" />
+
+<img width="1014" height="759" alt="image" src="https://github.com/user-attachments/assets/a4e8be49-875a-4458-82a1-3e824c9b695c" />
+
 
 ---
 
