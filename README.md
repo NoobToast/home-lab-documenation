@@ -15,7 +15,7 @@ This repository contains step-by-step guides for implementing network segmentati
 - **[VLAN Setup in pfSense](vlan-setup-guide.md)** - Step-by-step guide to configuring network segmentation using VLANs in pfSense 2.8
 
 ### Security & Filtering
-- **[pfBlockerNG Configuration](pfblocker-setup.md)** - Setting up IP blocking and DNS-based filtering for ads, trackers, and malicious domains
+- **[pfBlockerNG Configuration](pfBlocker-setup.md)** - Setting up IP blocking and DNS-based filtering for ads, trackers, and malicious domains
 
 ### System Administration
 - **[Linux Disk Formatting](formatting-drive-on-linux.md)** - Practical guide to partitioning, formatting, and mounting drives in Linux
