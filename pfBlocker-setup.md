@@ -90,18 +90,56 @@ Click **Save**.
 
 ## IP Blocking Configuration
 
-### 1. Configure IP Settings
-
 Navigate to **Firewall → pfBlockerNG → IP**
 
-| Setting | Value |
-|---------|-------|
-| Enable IP Blocking | ✓ |
-| Outbound Firewall Rules | ✓ |
-| Inbound Firewall Rules | ✓ |
-| Logging | Enable |
+### IP Configuration
 
-Enabling both inbound and outbound rules ensures malicious IPs can neither reach your network nor be contacted by devices already on it.
+| Setting | Value | Notes |
+|---------|-------|-------|
+| De-Duplication | ✓ | Removes duplicate IPs across lists — leave enabled |
+| CIDR Aggregation | ✓ | Merges adjacent IP ranges into larger blocks for efficiency — leave enabled |
+| Suppression | ✓ | Prevents RFC1918 and loopback addresses from being accidentally blocked — leave enabled |
+| Force Global IP Logging | Leave unchecked | Only needed if you want to override per-feed logging settings globally |
+| Placeholder IP Address | `127.1.7.7` | Used as a placeholder for blocked IPs — leave as default unless it conflicts with something on your network |
+
+### ASN Configuration
+
+ASN (Autonomous System Number) blocking lets you block entire networks owned by a specific organization or ISP. This requires a free IPinfo account.
+
+| Setting | Value | Notes |
+|---------|-------|-------|
+| ASN Reporting | Disabled | Enable if you want ASN data appended to block/reject log entries |
+| ASN IPinfo Token | (leave blank) | Register at IPinfo.io for a free token if you want ASN functionality |
+
+> **Note:** If you use Suricata, check for IPinfo blocked events before enabling ASN features — they can conflict.
+
+### MaxMind GeoIP Configuration
+
+GeoIP blocking requires a free MaxMind account. Without credentials entered here, the GeoIP tab will not function.
+
+| Setting | Value | Notes |
+|---------|-------|-------|
+| MaxMind Account ID | (your account ID) | Register for free at MaxMind.com — use GeoLite2 update version 3.1.1 or newer |
+| MaxMind License Key | (your license key) | Generated in your MaxMind account dashboard |
+| MaxMind Localized Language | English | Controls locale data for country names |
+| MaxMind CSV Updates | Leave unchecked | Only check this if you want to disable the monthly CSV database update |
+
+> GeoIP is optional — skip this section if you don't plan to use country-based blocking. See the GeoIP section below for caveats before enabling it.
+
+### IP Interface/Rules Configuration
+
+This is where you define which interfaces pfBlockerNG applies IP blocking rules to and how.
+
+| Setting | Value | Notes |
+|---------|-------|-------|
+| Inbound Firewall Rules | Select all interfaces (WAN, LAN, SERVERS_VLAN30, DESKTOP_VLAN10, WIFI_VLAN20, IOT_VLAN40) | Action: **Block** — drops inbound traffic from malicious IPs before it reaches your network |
+| Outbound Firewall Rules | Select all interfaces | Action: **Reject** — prevents your devices from reaching known malicious IPs outbound |
+| Floating Rules | Leave unchecked | pfBlockerNG manages its own floating rules automatically |
+| Firewall Auto Rule Order | `pfB_Pass/Match/Block/Reject \| All other Rules` (default) | Controls where pfBlockerNG rules sit relative to your manual rules — default is correct |
+| Firewall Auto Rule Suffix | `auto rule` (default) | Label applied to auto-generated rules — leave as-is |
+| Kill States | Leave unchecked | When enabled, clears active firewall states for newly blocked IPs after a cron run or force update — useful but aggressive; enable once you're confident in your feed selection |
+
+> **Inbound vs. Outbound actions:** Block (inbound) silently drops packets. Reject (outbound) sends a reset back to the source, which is more appropriate for outbound traffic from your own devices since it produces a faster failure rather than a timeout.
 
 ### 2. Add IP Threat Feeds
 
