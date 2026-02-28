@@ -245,9 +245,9 @@ This step is required after initial setup and after adding new feeds.
 
 ## Firewall Rule Verification
 
-pfBlockerNG automatically creates floating firewall rules. Verify they're in place:
+pfBlockerNG automatically creates floating firewall rules for each VLAN its monitoring. Verify they're in place:
 
-Navigate to **Firewall → Rules → Floating**
+Navigate to **Firewall → Rules → VLAN**
 
 The auto-generated rules should be:
 - At the **top** of the rule list (processed before your manual rules)
