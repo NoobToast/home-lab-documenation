@@ -49,6 +49,10 @@ We'll use Rufus to flash the pfSense ISO onto the USB drive.
 5. Click **Start** and confirm any prompts
 6. When finished, eject the flash drive
 
+<img width="512" height="636" alt="image" src="https://github.com/user-attachments/assets/52a5650b-907e-412f-a195-696d19de9d74" />
+
+
+
 That USB drive is reusable — you can use it to install pfSense on as many machines as you want.
 
 ---
