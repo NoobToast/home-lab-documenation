@@ -21,7 +21,6 @@ This repository contains step-by-step guides for implementing network segmentati
 - **[pfBlockerNG Configuration](pfBlocker-setup.md)** - Setting up IP blocking and DNS-based filtering for ads, trackers, and malicious domains
 
 ### System Administration
-- **[Linux Disk Formatting](formatting-drive-on-linux.md)** - Practical guide to partitioning, formatting, and mounting drives in Linux
 - **[Samba File Share Setup](samba-file-share.md)** - Configuring SMB file sharing on Ubuntu Server for local network access
 
 ## Lab Environment
