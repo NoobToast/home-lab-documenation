@@ -19,8 +19,7 @@ This repository contains step-by-step guides for implementing network segmentati
 
 ### Security & Filtering
 - **[pfBlockerNG Configuration](3.pfBlocker-setup.md)** - Setting up IP blocking and DNS-based filtering for ads, trackers, and malicious domains
-
-- **[Suricata Configuration](5.suricata-setup.md)** - Setting up Suricata in pfSense. 
+- **[Suricata Configuration](5.suricata-setup.md)** - Setting up Suricata IDS/IPS in pfSense for real-time intrusion detection and prevention
 
 ### System Administration
 - **[Samba File Share Setup](5.samba-file-share.md)** - Configuring SMB file sharing on Ubuntu Server for local network access
@@ -35,7 +34,7 @@ These guides reflect implementations on the following hardware:
 
 **Network Utility Server:**
 - AMD Ryzen 5 3600 6-Core CPU 3.6ghz, 16GB RAM, 1.5TB HDD + 128GB NVMe, EVGA Nvidia Geforce GTX 1050Ti 4GB VRAM
-- Ubuntu Server running Promethius, Grafana, Wolf GPU Streaming, Excalidraw Containers
+- Ubuntu Server running Prometheus, Grafana, Wolf GPU Streaming, Excalidraw Containers
 
 **File Server:**
 - HP EliteDesk 800 G3 Mini (i5-6500, 8GB RAM)
@@ -52,11 +51,11 @@ ISP Modem
     |
 pfSense Firewall (192.168.1.1)
     |
-Managed Switch (VLANs 10, 20, 30)
+Managed Switch (VLANs 10, 20, 30, 40)
     |
-    ├── VLAN 10: Management (192.168.10.0/24)
-    ├── VLAN 20: User Devices (192.168.20.0/24)
-    ├── VLAN 30: Servers (192.168.30.0/24)
+    ├── VLAN 10: Desktop   (192.168.10.0/24)
+    ├── VLAN 20: WiFi      (192.168.20.0/24)
+    ├── VLAN 30: Servers   (192.168.30.0/24)
     └── VLAN 40: IoT/Guest (192.168.40.0/24)
 ```
 
@@ -71,7 +70,6 @@ Managed Switch (VLANs 10, 20, 30)
 **Infrastructure:**
 - Ubuntu Server (file server, services)
 - Samba (SMB file sharing)
-- Apache (web services)
 - MariaDB (database)
 
 **Monitoring:**
@@ -109,12 +107,12 @@ The goal is to document practical, working implementations rather than theoretic
 ## Future Documentation
 
 Planned additions:
-- WireGuard VPN setup for remote access
-- Suricata IDS/IPS configuration
 - Wazuh SIEM deployment and rule tuning
+- WireGuard VPN setup for remote access
 - Container orchestration with Docker
 - Automated backups with rsync/rclone
 - Let's Encrypt SSL certificates for internal services
+- Linux disk formatting and drive management
 
 ## Contributing
 
@@ -124,13 +122,7 @@ This is a personal documentation repository, but corrections and suggestions are
 
 **Greg Diny**
 
-10 years experience managing industrial production systems with SCADA/PLC automation, equipment reliability, and 24/7 operations. Currently transitioning to DevOps engineering while building hands-on infrastructure and security experience through home lab projects.
-
-## Related Projects
-
-- [THIS.GameSuite](https://github.com/NoobToast/THIS.GameSuite) - Game engine framework demonstrating system architecture and modular design
-- [Prometheus/Grafana Configuration](https://github.com/NoobToast/Prometheus_Grafana_Configuration) - Home lab monitoring stack
-- [GPU Retro Game Streaming Server](https://github.com/NoobToast/gpu-retro-game-streaming-server) - Containerized game streaming infrastructure
+10 years experience making award winning alcohol. 
 
 ## License
 
@@ -138,4 +130,4 @@ MIT License - Feel free to use these guides for your own projects.
 
 ---
 
-*Last Updated: January 2026*
+*Last Updated: February 2026*
