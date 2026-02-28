@@ -20,6 +20,8 @@ This repository contains step-by-step guides for implementing network segmentati
 ### Security & Filtering
 - **[pfBlockerNG Configuration](pfBlocker-setup.md)** - Setting up IP blocking and DNS-based filtering for ads, trackers, and malicious domains
 
+- **[Suricata Configuration](suricata-setup.md)** - Setting up Suricata in pfSense. 
+
 ### System Administration
 - **[Samba File Share Setup](samba-file-share.md)** - Configuring SMB file sharing on Ubuntu Server for local network access
 
