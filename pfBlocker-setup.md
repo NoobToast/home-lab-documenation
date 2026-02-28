@@ -1,206 +1,314 @@
 # pfBlockerNG Setup and Configuration Guide
+
 **Author:** Greg Diny
 
-A guide to setting up pfBlockerNG for IP blocking and DNS filtering on pfSense.
+A guide to setting up pfBlockerNG for IP blocking and DNS filtering on pfSense. This guide assumes you have already completed the [pfSense installation](installing-pfsense.md) and [VLAN setup](vlan-setup-pfsense.md) guides.
+
+---
 
 ## What is pfBlockerNG?
 
-pfBlockerNG is a powerful pfSense package that provides:
-- **IP reputation blocking** - Block malicious IPs from threat feeds
-- **DNS-based filtering (DNSBL)** - Block ads, trackers, and malware domains
-- **GeoIP blocking** - Block traffic from specific countries/regions
-- **ASN blocking** - Block entire ISP/organization networks
+pfBlockerNG is a pfSense package that extends your firewall into a full network-level content filter. It operates at two layers:
+
+- **IP reputation blocking** — Blocks known malicious IPs using curated threat feeds, both inbound and outbound
+- **DNS-based filtering (DNSBL)** — Blocks ads, trackers, and malware domains before they ever resolve, protecting every device on your network without needing per-device software
+- **GeoIP blocking** — Blocks traffic from specific countries or regions
+- **ASN blocking** — Blocks entire ISP or organization networks
+
+Because DNSBL operates at the DNS level, it protects every device on your network automatically — phones, smart TVs, IoT devices — without installing anything on them.
+
+---
 
 ## Prerequisites
 
 - pfSense 2.6+ installed and configured
+- VLANs configured (if applicable) — see [VLAN Setup Guide](vlan-setup-pfsense.md)
 - Internet connectivity
-- Basic understanding of pfSense firewall rules
+- Basic familiarity with pfSense navigation
+
+---
 
 ## Installation
 
-### 1. Install pfBlockerNG Package
+### 1. Install the Package
 
-1. Navigate to: **System → Package Manager → Available Packages**
-2. Search for `pfblockerng`
-3. Click **Install**
-4. Wait for installation to complete
+1. Navigate to **System → Package Manager → Available Packages**
+2. Search for `pfblockerng-devel` (the development version has more features and is what most users run)
+3. Click **Install** and wait for it to complete
 
 ### 2. Initial Configuration
 
-1. Navigate to: **Firewall → pfBlockerNG → General**
-2. **Enable pfBlockerNG:** Check the box
-3. **CRON Settings:**
-   - **Daily:** `00:00` (midnight)
-   - **Weekly:** Sunday at `01:00`
-4. **Keep Settings:** `52 weeks` (keep historical data for a year)
-5. Click **Save**
+1. Navigate to **Firewall → pfBlockerNG → General**
+2. Fill in the following:
+
+   | Setting | Value |
+   |---------|-------|
+   | Enable pfBlockerNG | ✓ |
+   | Daily CRON | `00:00` (midnight — runs feed updates and rule rebuilds daily) |
+   | Weekly CRON | Sunday at `01:00` (runs heavier maintenance tasks) |
+   | Keep Settings | `52 weeks` |
+
+3. Click **Save**
+
+### 3. Configure DNSBL
+
+pfBlockerNG needs a dedicated virtual IP to serve its block page. Without this, blocked DNS queries will either fail silently or return errors instead of a block page.
+
+Navigate to **Firewall → pfBlockerNG → DNSBL** and configure the following sections:
+
+**DNSBL**
+
+| Setting | Value |
+|---------|-------|
+| Enable DNSBL | ✓ |
+| DNSBL Mode | Unbound mode |
+| Wildcard Blocking (TLD) | Leave unchecked (advanced — read the infoblock before enabling) |
+| Resolver Live Sync | Leave unchecked unless you need hourly updates without resolver reloads |
+
+**DNSBL Webserver Configuration**
+
+| Setting | Value |
+|---------|-------|
+| Virtual IP Address | `10.10.10.1` (must be RFC1918 compliant and not already in use on your network) |
+| DNSBL VIP Type | IP Alias (default) |
+| Web Server Interface | Localhost (default — leave this as-is) |
+
+**DNSBL Configuration**
+
+| Setting | Value |
+|---------|-------|
+| Permit Firewall Rules | ✓ — important for multi-VLAN setups (see note below) |
+| Global Logging/Blocking Mode | No Global mode (default) |
+| Blocked Webpage | `dnsbl_default.php` (default) |
+| Resolver Cache | ✓ |
+
+> **Important — Permit Firewall Rules:** If you have multiple VLANs, check this box and select all your interfaces from the list (LAN, DESKTOP_VLAN10, SERVERS_VLAN30, etc.). This creates floating firewall rules that allow each VLAN to reach the DNSBL webserver and display the block page correctly. Without it, devices on VLANs other than LAN will get a connection error instead of a block page when a domain is blocked. Since your DHCP server already hands out pfSense as the DNS server for each VLAN, all devices route DNS through pfBlockerNG automatically — this setting just ensures the block page renders correctly across all segments.
+
+Click **Save**.
+
+---
 
 ## IP Blocking Configuration
 
 ### 1. Configure IP Settings
 
-Navigate to: **Firewall → pfBlockerNG → IP**
+Navigate to **Firewall → pfBlockerNG → IP**
 
-**Settings:**
-- **Enable IP Blocking:** ✓
-- **Outbound Firewall Rules:** ✓ (blocks internal devices from reaching malicious IPs)
-- **Inbound Firewall Rules:** ✓ (blocks malicious IPs from reaching your network)
-- **Logging:** Enable (helps with troubleshooting)
+| Setting | Value |
+|---------|-------|
+| Enable IP Blocking | ✓ |
+| Outbound Firewall Rules | ✓ |
+| Inbound Firewall Rules | ✓ |
+| Logging | Enable |
+
+Enabling both inbound and outbound rules ensures malicious IPs can neither reach your network nor be contacted by devices already on it.
 
 ### 2. Add IP Threat Feeds
 
-Navigate to: **Firewall → pfBlockerNG → Feeds**
+Navigate to **Firewall → pfBlockerNG → Feeds**
 
-**Recommended Threat Feeds:**
-- **Emerging Threats:** Block known malicious IPs
-- **Spamhaus DROP/EDROP:** Hijacked networks
-- **Abuse.ch URLhaus:** Malware distribution sites
-- **FireHOL Level 1:** Comprehensive malicious IP list
+The following feeds are a solid starting point. Add them one at a time, test after each batch, and expand from there.
 
-**To Add a Feed:**
+| Feed | URL | Description |
+|------|-----|-------------|
+| Emerging Threats | `https://rules.emergingthreats.net/blockrules/compromised-ips.txt` | Known compromised hosts |
+| Spamhaus DROP | `https://www.spamhaus.org/drop/drop.txt` | Hijacked/leased networks used for attacks |
+| Spamhaus EDROP | `https://www.spamhaus.org/drop/edrop.txt` | Extended version of DROP |
+| Abuse.ch URLhaus | `https://urlhaus.abuse.ch/downloads/text/` | Active malware distribution IPs |
+| FireHOL Level 1 | `https://raw.githubusercontent.com/firehol/blocklist-ipsets/master/firehol_level1.netset` | Curated high-confidence malicious IPs |
+
+**To add each feed:**
+
 1. Click **Add**
-2. **Format:** IPv4
-3. **Action:** Deny Both (block inbound and outbound)
-4. **Frequency:** Daily
-5. **URL:** (feed URL from provider)
-6. **Description:** (descriptive name)
-7. Click **Save**
+2. Fill in:
+
+   | Field | Value |
+   |-------|-------|
+   | Format | IPv4 |
+   | Action | Deny Both |
+   | Frequency | Daily |
+   | URL | (from table above) |
+   | Description | (feed name) |
+
+3. Click **Save**
 
 ### 3. GeoIP Blocking (Optional)
 
-Navigate to: **Firewall → pfBlockerNG → IP → GeoIP**
+Navigate to **Firewall → pfBlockerNG → IP → GeoIP**
 
-**Example: Block High-Risk Regions**
-- Select countries to block (e.g., known high-traffic spam sources)
+GeoIP blocking lets you block traffic from entire countries or regions. It can be effective but comes with significant caveats for home use.
+
+> **Warning:** Major cloud providers (AWS, Google, Cloudflare, Azure) operate infrastructure in virtually every country. Blocking a country often means blocking services hosted there, not just users from that country. For most home lab setups, GeoIP blocking causes more false positives than it's worth. If you do enable it, start with **Deny Inbound only** and monitor logs closely before switching to Deny Both.
+
+If you choose to enable it:
+- Select target countries
 - **Action:** Deny Inbound
 - **Logging:** Enable
 
-> **Warning:** GeoIP blocking can cause issues with legitimate services. Test carefully.
+---
 
 ## DNS Filtering (DNSBL) Configuration
 
-DNS filtering blocks domains before they resolve, preventing connections to malicious or unwanted sites.
+### 1. Add DNSBL Feeds
 
-### 1. Enable DNSBL
+Navigate to **Firewall → pfBlockerNG → DNSBL → DNSBL Groups**
 
-Navigate to: **Firewall → pfBlockerNG → DNSBL**
+The following feeds cover ads, trackers, and malware domains:
 
-**Settings:**
-- **Enable DNSBL:** ✓
-- **DNSBL Mode:** Unbound mode (integrates with pfSense DNS)
-- **DNSBL Listening Interface:** LAN (or your internal interface)
-- **DNSBL SSL Certificate:** Generate (for HTTPS blocking)
+| Feed | URL | Description |
+|------|-----|-------------|
+| EasyList | `https://easylist.to/easylist/easylist.txt` | Standard ad blocking list |
+| Steven Black Unified | `https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts` | Ads, malware, and trackers combined |
+| Malware Domain List | `https://www.malwaredomainlist.com/hostslist/hosts.txt` | Known malware domains |
+| hagezi Pro | `https://raw.githubusercontent.com/hagezi/dns-blocklists/main/domains/pro.txt` | Comprehensive multi-purpose blocklist |
 
-### 2. Add DNSBL Feeds
+**To add each feed:**
 
-**Recommended Feeds:**
-- **EasyList:** Ad blocking
-- **Steven Black Unified:** Ads + malware + trackers
-- **Malware Domain List:** Known malware domains
-- **Ransomware Tracker:** Ransomware C&C servers
+1. Click **Add**
+2. Fill in:
 
-**To Add DNSBL Feed:**
-1. Navigate to: **Firewall → pfBlockerNG → DNSBL → DNSBL Groups**
-2. Click **Add**
-3. **Group Name:** (e.g., "Ads")
-4. **Action:** Unbound
-5. **Logging:** Enable
-6. **Feed Sources:** Add feed URLs
-7. Click **Save**
+   | Field | Value |
+   |-------|-------|
+   | Group Name | (descriptive name, e.g., `Ads` or `Malware`) |
+   | Action | Unbound |
+   | Logging | Enable |
 
-### 3. Configure DNS Resolver
+3. Add the feed URL under **Feed Sources**
+4. Click **Save**
 
-Navigate to: **Services → DNS Resolver → General Settings**
+### 2. Verify DNS Resolver Settings
 
-Ensure:
-- **Enable DNS Resolver:** ✓
-- **DNSSEC:** ✓ (recommended)
-- **Listen Interfaces:** LAN
-- **Outgoing Interfaces:** WAN
+Navigate to **Services → DNS Resolver → General Settings** and confirm:
 
-## Firewall Rule Configuration
+| Setting | Value |
+|---------|-------|
+| Enable DNS Resolver | ✓ |
+| DNSSEC | ✓ |
+| Listen Interfaces | All (or every VLAN interface) |
+| Outgoing Interfaces | WAN |
 
-pfBlockerNG creates automatic firewall rules, but you may need to adjust:
-
-Navigate to: **Firewall → Rules → Floating**
-
-You should see pfBlockerNG auto-generated rules. These should be:
-- **At the top of the rule list** (processed first)
-- **Quick:** Enabled (stops processing once matched)
-- **Interface:** Any
-
-## Testing and Verification
-
-### 1. Test IP Blocking
-
-```bash
-# Try to ping a blocked IP
-ping <blocked-ip>
-# Should timeout or be rejected
-```
-
-### 2. Test DNSBL
-
-Visit a known tracking domain (e.g., doubleclick.net). It should:
-- Fail to resolve
-- Show pfBlockerNG block page (if configured)
-
-### 3. Check Logs
-
-Navigate to: **Firewall → pfBlockerNG → Reports**
-
-Review:
-- **Alerts:** Blocked connections
-- **DNSBL:** Blocked DNS queries
-- **Top Sources:** Devices making the most requests
-
-## Troubleshooting
-
-**Legitimate sites being blocked:**
-1. Navigate to: **Firewall → pfBlockerNG → Reports**
-2. Find the blocked domain/IP
-3. Click **Suppress** to whitelist
-4. Or add to **Custom Lists → Whitelist**
-
-**pfBlockerNG not blocking anything:**
-- Verify feeds are enabled and updated
-- Check firewall rules are present: **Firewall → Rules → Floating**
-- Ensure pfBlockerNG is enabled: **Firewall → pfBlockerNG → General**
-- Force an update: **Firewall → pfBlockerNG → Update**
-
-**High CPU usage:**
-- Reduce feed frequency to weekly
-- Disable verbose logging
-- Limit number of feeds (start with 3-5)
-
-**DNS not working:**
-- Verify DNSBL mode is set correctly (Unbound)
-- Check DNS Resolver is enabled
-- Ensure devices point to pfSense for DNS
-
-## Performance Tips
-
-1. **Start small:** Enable 2-3 feeds, test, then add more
-2. **Use daily updates:** Weekly for most feeds is sufficient
-3. **Monitor logs:** Check false positives regularly
-4. **Whitelist carefully:** Add trusted domains to prevent blocks
-5. **Optimize rules:** Keep rule count reasonable (under 100k IPs)
-
-## Maintenance
-
-**Regular Tasks:**
-- **Weekly:** Review blocked domains/IPs for false positives
-- **Monthly:** Check for package updates
-- **Quarterly:** Review and optimize feed selection
-- **Yearly:** Clean up old logs and statistics
-
-## Resources
-
-- **pfBlockerNG Documentation:** Official pfSense docs
-- **Feed Providers:** Research reputable threat intelligence sources
-- **Community Forums:** pfSense forum for troubleshooting
+If you followed the VLAN setup guide, your DHCP server is already handing out `192.168.x.1` (pfSense) as the DNS server for each interface. This means every device on every VLAN will automatically route DNS through pfBlockerNG — no per-device configuration needed.
 
 ---
 
-*This guide reflects practical implementation experience with pfBlockerNG in a home network environment with multiple VLANs and diverse device types.*
+## Step 3: Force Initial Update
+
+After saving your feed configuration, you need to force pfBlockerNG to pull all feeds for the first time. It won't do this automatically until the next scheduled CRON run.
+
+1. Navigate to **Firewall → pfBlockerNG → Update**
+2. Select **Reload All**
+3. Click **Run**
+4. Watch the output log — it should show each feed being downloaded and processed
+5. When complete, navigate to **Firewall → Rules → Floating** and verify pfBlockerNG rules are present
+
+This step is required after initial setup and after adding new feeds.
+
+---
+
+## Firewall Rule Verification
+
+pfBlockerNG automatically creates floating firewall rules. Verify they're in place:
+
+Navigate to **Firewall → Rules → Floating**
+
+The auto-generated rules should be:
+- At the **top** of the rule list (processed before your manual rules)
+- **Quick** enabled (stops processing once matched)
+- **Interface:** Any
+
+If you don't see these rules, go back to **Firewall → pfBlockerNG → Update** and run **Reload All** again.
+
+---
+
+## Testing and Verification
+
+### Test IP Blocking
+
+```bash
+# Attempt to reach a known blocked IP — should timeout or be rejected
+ping <blocked-ip>
+```
+
+### Test DNSBL
+
+Visit `doubleclick.net` in a browser. It should either:
+- Fail to resolve entirely
+- Redirect to the pfBlockerNG block page (at your virtual IP)
+
+### Check Logs and Reports
+
+Navigate to **Firewall → pfBlockerNG → Reports**
+
+| Tab | What to look for |
+|-----|-----------------|
+| Alerts | Blocked IP connections |
+| DNSBL | Blocked DNS queries |
+| Top Sources | Devices generating the most blocked requests |
+
+Review these regularly, especially in the first week, to catch false positives before they become a problem.
+
+---
+
+## Troubleshooting
+
+**Legitimate sites being blocked**
+1. Navigate to **Firewall → pfBlockerNG → Reports → DNSBL**
+2. Find the blocked domain
+3. Click **Suppress** to whitelist it, or add it manually under **Firewall → pfBlockerNG → DNSBL → Whitelist**
+
+**pfBlockerNG not blocking anything**
+- Verify feeds are enabled: **Firewall → pfBlockerNG → Feeds**
+- Check floating rules exist: **Firewall → Rules → Floating**
+- Confirm pfBlockerNG is enabled: **Firewall → pfBlockerNG → General**
+- Force a reload: **Firewall → pfBlockerNG → Update → Reload All**
+
+**DNS not resolving at all**
+- Verify DNSBL mode is set to Unbound
+- Check DNS Resolver is enabled: **Services → DNS Resolver**
+- Confirm the DNSBL Virtual IP doesn't conflict with any existing IP on your network
+- If your DHCP is configured correctly per the previous guides, devices are already pointed at pfSense for DNS — check that the DNS Resolver listen interfaces include all your VLANs
+
+**Block page not appearing (blank page or connection error instead)**
+- Verify the DNSBL Virtual IP is set and doesn't conflict with anything
+- Check that the DNSBL SSL certificate was generated
+- Some browsers cache DNS aggressively — try a different browser or flush DNS with `ipconfig /flushdns` (Windows) or `sudo dscacheutil -flushcache` (macOS)
+
+**High CPU usage**
+- Reduce feed update frequency to weekly
+- Disable verbose logging
+- Limit feeds to 3–5 to start — you can always add more once things are stable
+- Avoid feeds with tens of millions of entries unless your hardware can handle it
+
+---
+
+## Performance Tips
+
+1. **Start small:** Enable 2–3 feeds, run for a week, review logs, then add more
+2. **Weekly updates are usually enough:** Daily updates for every feed add unnecessary load
+3. **Monitor for false positives:** The first week is the most important time to review logs
+4. **Whitelist proactively:** Add known-good domains before users report problems
+5. **Keep rule count reasonable:** Aim to stay under 100k IPs in your block lists until you've verified your hardware can handle more
+
+---
+
+## Ongoing Maintenance
+
+| Frequency | Task |
+|-----------|------|
+| Weekly | Review DNSBL and IP alert logs for false positives |
+| Monthly | Check for pfBlockerNG package updates |
+| Quarterly | Review feed selection — remove underperforming or redundant feeds |
+| Yearly | Clean up old logs and statistics |
+
+---
+
+## Resources
+
+- [pfBlockerNG Documentation](https://docs.netgate.com/pfsense/en/latest/packages/pfblocker.html) — Official Netgate docs
+- [Hagezi DNS Blocklists](https://github.com/hagezi/dns-blocklists) — Well-maintained, categorized blocklists
+- [FireHOL IP Lists](https://github.com/firehol/blocklist-ipsets) — Curated IP reputation feeds
+- [pfSense Community Forum](https://forum.netgate.com) — Best place for pfBlockerNG troubleshooting
+
+---
+
+*This guide reflects practical implementation experience with pfBlockerNG in a home lab environment with multiple VLANs and diverse device types.*
