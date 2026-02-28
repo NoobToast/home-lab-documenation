@@ -30,12 +30,12 @@ These guides reflect implementations on the following hardware:
 - Running pfSense with pfBlockerNG and Suricata
 
 **Network Utility Server:**
-- HP EliteDesk 800 G3 Mini (i5-6500, 8GB RAM)
-- Ubuntu Desktop running Wazuh (SIEM), Netdata (monitoring)
+- AMD Ryzen 5 3600 6-Core CPU 3.6ghz, 16GB RAM, 1.5TB HDD + 128GB NVMe, EVGA Nvidia Geforce GTX 1050Ti 4GB VRAM
+- Ubuntu Server running Promethius, Grafana, Wolf GPU Streaming, Excalidraw Containers
 
 **File Server:**
-- Dell Wyse 5070 (Celeron J4105, 8GB RAM, 256GB SSD)
-- Ubuntu Server with Samba, Apache, MariaDB
+- HP EliteDesk 800 G3 Mini (i5-6500, 8GB RAM)
+- Ubuntu Server with Samba, MariaDB
 
 **Network Infrastructure:**
 - TP-Link SG108E Managed Switch (VLAN support)
